@@ -1,0 +1,43 @@
+{
+  "name": "serverless-clientes-api",
+  "version": "1.0.0",
+  "description": "API REST serverless para la gestión de clientes construida con Node.js y AWS Lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:unit": "set NODE_ENV=test-unit && jest test/cliente/unit",
+    "test:int": "set NODE_ENV=test-int && jest test/cliente/integration",
+    "start": "set IS_OFFLINE=true && serverless offline --stage dev",
+    "dev": "set IS_OFFLINE=true && serverless offline start --stage dev",
+    "dynamo:init": "node scripts/dynamodb/init-tables.js",
+    "lint": "eslint ."
+  },
+  "author": "Dwight Yontop",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1030.0",
+    "@aws-sdk/client-ses": "^3.1038.0",
+    "@aws-sdk/client-sns": "^3.1038.0",
+    "@aws-sdk/lib-dynamodb": "^3.1030.0",
+    "dotenv": "^17.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "module-alias": "^2.3.4",
+    "pg": "^8.20.0",
+    "redis": "^5.11.0",
+    "uuid": "^13.0.0"
+  },
+  "_moduleAliases": {
+    "@common": "src/common",
+    "@config": "src/config",
+    "@modules": "src"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.3",
+    "jest": "^30.3.0",
+    "nodemon": "^3.1.14",
+    "serverless": "^3.38.0",
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-offline": "^13.3.1",
+    "supertest": "^7.2.2"
+  }
+}

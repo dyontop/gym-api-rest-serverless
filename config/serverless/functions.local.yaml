@@ -1,0 +1,43 @@
+getClientes:
+  handler: src/cliente/infrastructure/handlers/obtener-clientes.handler
+  events:
+    - httpApi:
+        path: /clientes
+        method: get
+
+getCliente:
+  handler: src/cliente/infrastructure/handlers/obtener-cliente.handler
+  events:
+    - httpApi:
+        path: /clientes/{id}
+        method: get
+
+createCliente:
+  handler: src/cliente/infrastructure/handlers/agregar-cliente.handler
+  events:
+    - httpApi:
+        path: /clientes
+        method: post
+
+login:
+    handler: src/auth/infrastructure/handlers/login.handler
+    events:
+      - httpApi:
+          path: /auth/login
+          method: post
+
+
+
+registrarEvento:
+  handler: src/evento/infrastructure/handlers/registrar-evento.handler
+  events:
+    - httpApi:
+        path: /eventos
+        method: post
+
+obtenerEventos:
+  handler: src/evento/infrastructure/handlers/obtener-eventos.handler
+  events:
+    - httpApi:
+        path: /eventos
+        method: get
