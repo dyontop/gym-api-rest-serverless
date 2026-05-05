@@ -3,6 +3,8 @@ const ClienteRepository = require("@modules/cliente/domain/repository/cliente.re
 const Cliente = require("@modules/cliente/domain/entities/cliente");
 const logger = require("@common/logger");
 
+let connectionPromise = null;
+
 class ClienteRedisRepository extends ClienteRepository {
 
   constructor() {
@@ -44,10 +46,22 @@ class ClienteRedisRepository extends ClienteRepository {
   }
 
   async ensureConnection() {
-    if (this.client.isOpen) return;  // evitar doble conexión (propio de Redis v4)
+    if (this.client.isOpen) return;  // Evitar reconectar si ya está conectado (propio de Redis v4)
+
+    if (!connectionPromise) { // Evita múltiples conexiones concurrentes, Solo la primera request crea la conexión. Las demás esperan la misma promesa (N requests al mismo tiempo pueden intentar conectar) 
+      
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Redis connection timeout")), 2000)
+      );
+
+      connectionPromise = Promise.race([
+        this.client.connect(),
+        timeout
+      ]);
+    }
 
     try {
-      await this.client.connect();
+      await connectionPromise;  // Todas las requests esperan aquí hasta que la conexión se establezca o falle
 
       logger.info("Redis conectado", {
         layer: "infrastructure",
@@ -59,6 +73,9 @@ class ClienteRedisRepository extends ClienteRepository {
         error: error.message
       });
       throw error;
+
+    } finally {
+      connectionPromise = null; // Reiniciar la promesa para futuros intentos de conexión si falla
     }
   }
 
