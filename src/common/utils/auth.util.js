@@ -14,7 +14,7 @@ function getUserFromEvent(event) {
     const user = verificarToken(token);
     return { 
       ... user,
-        authenticated: true
+      authenticated: true
     };
   } catch (err) {
     return { 

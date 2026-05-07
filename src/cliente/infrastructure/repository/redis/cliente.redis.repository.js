@@ -9,11 +9,19 @@ class ClienteRedisRepository extends ClienteRepository {
 
   constructor() {
     super();
+    this.retries = 0;
     this.client = createClient({
       url: process.env.REDIS_URL || "redis://localhost:6379",
       socket: {
         reconnectStrategy: (retries) => {
+          this.retries = retries;
+
           if (retries > 3) {
+            logger.error("Redis no disponible después de varios intentos", {
+              layer: "infrastructure",
+              repository: "ClienteRedisRepository",
+              retries
+            });
             return new Error("Redis no disponible");
           }
           return 500; // reintenta cada 500ms
@@ -23,26 +31,45 @@ class ClienteRedisRepository extends ClienteRepository {
     
     // Eventos importantes
     this.client.on("error", (err) => {
-      logger.error("Redis error", {
+      if (this.retries > 3) return; // evitar ruido después del fallo final
+
+      logger.error("Error de conexión Redis", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository",
-        error: err.message
-      });
-    });
-
-    this.client.on("end", () => {
-      logger.warn("Redis conexión cerrada", {
-        layer: "infrastructure",
-        repository: "ClienteRedisRepository"
+        error: err.message || "Sin detalle",
+        url: process.env.REDIS_URL
       });
     });
 
     this.client.on("reconnecting", () => {
       logger.warn("Redis reconectando...", {
         layer: "infrastructure",
+        repository: "ClienteRedisRepository",
+        intento: this.retries
+      });
+    });
+
+    this.client.on("connect", () => {
+      logger.info("Socket Redis conectado", {
+        layer: "infrastructure",
         repository: "ClienteRedisRepository"
       });
     });
+
+    this.client.on("ready", () => {
+      logger.info("Redis listo para operaciones", {
+        layer: "infrastructure",
+        repository: "ClienteRedisRepository"
+      });
+    });
+
+    this.client.on("end", () => {
+      logger.warn("Conexión Redis cerrada", {
+        layer: "infrastructure",
+        repository: "ClienteRedisRepository"
+      });
+    });
+
   }
 
   async ensureConnection() {
@@ -50,33 +77,33 @@ class ClienteRedisRepository extends ClienteRepository {
 
     if (!connectionPromise) { // Evita múltiples conexiones concurrentes, Solo la primera request crea la conexión. Las demás esperan la misma promesa (N requests al mismo tiempo pueden intentar conectar) 
       
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Redis connection timeout")), 2000)
-      );
-
-      connectionPromise = Promise.race([
-        this.client.connect(),
-        timeout
-      ]);
-    }
-
-    try {
-      await connectionPromise;  // Todas las requests esperan aquí hasta que la conexión se establezca o falle
-
-      logger.info("Redis conectado", {
+      logger.info("Intentando conectar a Redis", {
         layer: "infrastructure",
-        repository: "ClienteRedisRepository"
+        repository: "ClienteRedisRepository",
+        url: process.env.REDIS_URL
       });
 
-    } catch (error) {
-      logger.error("Error conectando a Redis", {
-        error: error.message
-      });
-      throw error;
+      connectionPromise = this.client.connect()
+        .then(() => {
+          logger.info("Conexión Redis establecida", {
+            layer: "infrastructure",
+            repository: "ClienteRedisRepository"
+          });
+        })
+        .catch((error) => {
+          logger.error("Fallo definitivo conectando a Redis", {
+            layer: "infrastructure",
+            repository: "ClienteRedisRepository",
+            error: error.message,
+            retries: this.retries
+          });
 
-    } finally {
-      connectionPromise = null; // Reiniciar la promesa para futuros intentos de conexión si falla
+          connectionPromise = null; // Reset SOLO si falla
+
+          throw error;
+        });
     }
+     return connectionPromise;
   }
 
   async listar() {

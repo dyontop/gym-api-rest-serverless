@@ -1,5 +1,5 @@
 const logger = require("@common/logger");
-const mapper = require('@modules/cliente/application/mappers/cliente.mapper');
+const mapper = require("@modules/cliente/application/mappers/cliente.mapper");
 
 class ObtenerClientes {
   constructor(clienteRepository) {

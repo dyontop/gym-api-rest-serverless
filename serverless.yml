@@ -3,22 +3,59 @@ service: api-clientes
 provider:
   name: aws
   runtime: nodejs20.x
+  stage: ${opt:stage,'dev'}
   environment:
+    DB_PROVIDER: ${self:custom.env.DB_PROVIDER.${self:provider.stage}}
+    EVENT_PROVIDER: ${self:custom.env.EVENT_PROVIDER.${self:provider.stage}}
     EVENTOS_TABLE: eventos
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
+    
+    SNS_TOPIC_ARN:
+      Ref: ClienteRegistradoTopic # ARN del SNS Topic inyectado automáticamente por CloudFormation (cliente-registrado-topic) cuando se despliega la infraestructura (serverless deploy)
 
 
-  iam:
+  iam:  # Permisos IAM para las Lambdas puedan interactuar con DynamoDB y SNS
     role:
       statements:
         - Effect: Allow
           Action:
-            - dynamodb:PutItem
-            - dynamodb:Query
+            - dynamodb:PutItem  # permite crear/guardar registros en DynamoDB
+            - dynamodb:Query    # permite consultar datos en DynamoDB
           Resource: "*"
+        - Effect: Allow
+          Action:
+            - sns:Publish       # permite publicar mensajes en SNS
+          Resource:
+            - Ref: ClienteRegistradoTopic # restringido SOLO a este topic (cliente-registrado-topic)
+
+custom:
+  env:
+    DB_PROVIDER:
+      local: redis
+      dev: redis
+      prod: postgres
+    EVENT_PROVIDER:
+      local: console
+      dev: sns
+      prod: sns
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+package:
+  patterns:
+    - src/**
 
 functions: ${file(./config/serverless/functions.local.yaml)}
-
+resources: ${file(./config/serverless/resources.local.yaml)}
 # resources:
 #   Resources:
 #     EventosTable:
@@ -36,20 +73,3 @@ functions: ${file(./config/serverless/functions.local.yaml)}
 #           - AttributeName: timestamp
 #             KeyType: RANGE
 #         BillingMode: PAY_PER_REQUEST
-
-plugins:
-  - serverless-dynamodb-local
-  - serverless-offline
-
-custom:
-  dynamodb:
-    stages:
-      - dev
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-
-package:
-  patterns:
-    - src/**

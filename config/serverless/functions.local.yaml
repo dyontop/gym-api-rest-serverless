@@ -1,3 +1,7 @@
+# Este archivo define:
+# - Lambdas HTTP (sincrónicas → API Gateway)
+# - Lambdas asincrónicas (event-driven → SNS, SQS)
+
 getClientes:
   handler: src/cliente/infrastructure/handlers/obtener-clientes.handler
   events:
@@ -41,3 +45,13 @@ obtenerEventos:
     - httpApi:
         path: /eventos
         method: get
+
+# Funciones asincrónicas (event-driven)
+
+clienteRegistrado:  # reactivo: reacciona automáticamente a eventos (ej: envía email con SES)
+  handler: src/notifications/infrastructure/handlers/cliente-registrado.handler
+  events:
+    - sns:
+        arn:
+          Ref: ClienteRegistradoTopic
+        topicName: cliente-registrado-topic

@@ -15,40 +15,53 @@ class SnsEventPublisher {
   }
 
   async publish(event) {
+    if (!event?.type) {
+      throw new Error("Event type es requerido");
+    }
+
+    if (!event?.payload) {
+      throw new Error("Event payload es requerido");
+    }
+
+    const message = {
+      type: event.type,
+      payload: event.payload,
+      timestamp: new Date().toISOString(),
+      correlationId: event.correlationId || null,
+      source: "cliente-service"
+    };
+
     logger.info("Publicando evento en SNS", {
-      layer: "infrastructure",
       service: "SnsEventPublisher",
       type: event.type
     });
 
     try {
-      const params = {
+      const command = new PublishCommand({
         TopicArn: this.topicArn,
-        Message: JSON.stringify({
-          type: event.type,
-          payload: event.payload,
-          timestamp: new Date().toISOString()
-        }),
+        Message: JSON.stringify(message),
         MessageAttributes: {
           eventType: {
             DataType: "String",
             StringValue: event.type
           }
         }
-      };
+      });
 
-      const command = new PublishCommand(params);
       const response = await this.client.send(command);
 
-      logger.info("Evento publicado correctamente", {
-        messageId: response.MessageId
+      logger.info("Evento SNS publicado", {
+        messageId: response.MessageId,
+        eventType: event.type,
+        topicArn: this.topicArn
       });
 
       return response;
 
     } catch (error) {
       logger.error("Error publicando evento SNS", {
-        error: error.message
+        error: error.message,
+        eventType: event.type
       });
       throw error;
     }

@@ -7,8 +7,12 @@
     "test": "jest",
     "test:unit": "set NODE_ENV=test-unit && jest test/cliente/unit",
     "test:int": "set NODE_ENV=test-int && jest test/cliente/integration",
-    "start": "set IS_OFFLINE=true && serverless offline --stage dev",
-    "dev": "set IS_OFFLINE=true && serverless offline start --stage dev",
+    "offline:local": "set IS_OFFLINE=true && serverless offline --stage local",
+    "offline:dev": "set IS_OFFLINE=true && serverless offline --stage dev",
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove:dev": "serverless remove --stage dev",
     "dynamo:init": "node scripts/dynamodb/init-tables.js",
     "lint": "eslint ."
   },
@@ -32,7 +36,9 @@
     "@modules": "src"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "eslint": "^10.0.3",
+    "globals": "^17.6.0",
     "jest": "^30.3.0",
     "nodemon": "^3.1.14",
     "serverless": "^3.38.0",

@@ -15,50 +15,79 @@ class SesEmailService {
   }
 
   async enviarBienvenida(cliente) {
+    const toEmail = this._getEmail(cliente);
+
     logger.info("Enviando email con SES", {
       layer: "infrastructure",
       service: "SesEmailService",
-      clienteId: cliente.id
+      clienteId: cliente.id,
+      toEmail
     });
 
     try {
-      const params = {
+      const command = new SendEmailCommand({
         Source: this.fromEmail,
         Destination: {
-          ToAddresses: [this._getEmail(cliente)]
+          ToAddresses: [toEmail],
         },
         Message: {
           Subject: {
             Data: "Bienvenido 🚀",
+            Charset: "UTF-8",
           },
           Body: {
             Text: {
               Data: `Hola ${cliente.nombre}, bienvenido a la plataforma.`,
+              Charset: "UTF-8",
+            },
+            Html: {
+              Data: `
+                <html>
+                  <body>
+                    <h1>🚀 Bienvenido ${cliente.nombre}</h1>
+                    <p>Gracias por registrarte en nuestra plataforma.</p>
+                  </body>
+                </html>
+              `,
+              Charset: "UTF-8",
             },
           },
         },
-      };
+      });
 
-      const command = new SendEmailCommand(params);
       const response = await this.client.send(command);
 
       logger.info("Email enviado correctamente", {
+        layer: "infrastructure",
+        service: "SesEmailService",
         messageId: response.MessageId
       });
 
       return response;
 
     } catch (error) {
-      logger.error("Error enviando email SES", {
-        error: error.message
-      });
+
+      // 🔥 Manejo más fino de errores
+      if (error.name === "MessageRejected") {
+        logger.error("SES rechazó el mensaje", {
+          reason: error.message
+        });
+      } else {
+        logger.error("Error enviando email SES", {
+          error: error.message
+        });
+      }
+
       throw error;
     }
   }
 
   _getEmail(cliente) {
-    // ⚠️ temporal (ideal: cliente.email)
-    return `${cliente.nombre.toLowerCase()}@example.com`;
+    // ✅ PRODUCCIÓN: esto debe venir del dominio
+    if (!cliente.email) {
+      throw new Error("Cliente no tiene email");
+    }
+    return cliente.email;
   }
 }
 

@@ -1,11 +1,10 @@
 const { randomUUID } = require("crypto");
 const logger = require("@common/logger");
-const mapper = require('@modules/cliente/application/mappers/cliente.mapper');
+const mapper = require("@modules/cliente/application/mappers/cliente.mapper");
 
 class AgregarCliente {
-  constructor(clienteRepository, emailService, eventPublisher) {
+  constructor(clienteRepository, eventPublisher) {
     this.clienteRepository = clienteRepository;
-    this.emailService = emailService;
     this.eventPublisher = eventPublisher;
   }
 
@@ -24,27 +23,35 @@ class AgregarCliente {
 
     try {
 
-      // 1. Guardar cliente (core negocio)
+      // 1. CORE (negocio): guardar cliente
       const clienteGuardado = await this.clienteRepository.guardar(nuevoCliente);
 
-      // 2. Emitir evento (desacoplar side-effects)
+      // 2. EVENTO (comunicación): desacoplar efectos secundarios
       await this.eventPublisher.publish({
         type: "CLIENTE_REGISTRADO",
         payload: {
           id: clienteGuardado.id,
-          nombre: clienteGuardado.nombre
+          nombre: clienteGuardado.nombre,
+          email: clienteGuardado.email // importante para SES
         }
       });
 
-      // 3. Email (opcional - no rompe flujo)
-      try {
-        await this.emailService.enviarBienvenida(clienteGuardado);
-      } catch (error) {
-        logger.warn("Fallo envío de email", {
-          clienteId: clienteGuardado.id,
-          error: error.message
-        });
-      }
+      /**
+       * // ⚠️ ENVÍO DE EMAIL DIRECTO (SOLO PARA PRUEBAS / DEBUG LOCAL)
+       * Este bloque permite enviar el email de forma síncrona desde el caso de uso,
+       * sin pasar por SNS.
+       */
+
+      // 3. SIDE EFFECTS (reacciones) - enviar email, enviar SMS, etc
+      // try {
+      //   await this.emailService.enviarBienvenida(clienteGuardado);
+      // } catch (error) {
+      //   logger.warn("Fallo envío de email", {
+      //     clienteId: clienteGuardado.id,
+      //     error: error.message
+      //   });
+      // }
+    
       // Domain → DTO
       return mapper.toResponse(clienteGuardado);
       

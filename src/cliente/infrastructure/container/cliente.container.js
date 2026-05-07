@@ -20,8 +20,6 @@ const ClienteMemoryRepository = require("../repository/memory/cliente.memory.rep
 const ClientePostgresRepository = require("../repository/postgres/cliente.postgres.repository");
 const ClienteRedisRepository = require("../repository/redis/cliente.redis.repository");
 
-const ConsoleEmailService = require("../services/email/email.console.service");
-const SesEmailService = require("../services/email/email.ses.service");
 const ConsoleEventPublisher = require("../services/event/event.console.publisher");
 const SnsEventPublisher = require("../services/event/event.sns.publisher");
 
@@ -72,6 +70,32 @@ function createRepository() {
 }
 
 /**
+ * 🏭 Factory de event publisher
+ */
+function createEventPublisher() {
+  const eventProvider = process.env.EVENT_PROVIDER || "console";
+
+  logger.info("Inicializando event publisher", {
+    layer: "config",
+    module: "cliente",
+    provider: eventProvider
+  });
+
+  const providers = {
+    console: ConsoleEventPublisher,
+    sns: SnsEventPublisher
+  };
+
+  const EventClass = providers[eventProvider];
+
+  if (!EventClass) {
+    throw new Error("EVENT_PROVIDER inválido");
+  }
+
+  return new EventClass();
+}
+
+/**
  * 🧱 Inicialización del módulo cliente (Singleton)
  */
 function build() {
@@ -89,26 +113,7 @@ function build() {
   });
 
   const repository = createRepository();
-
-  // 🔥 Email provider
-  const emailProvider = process.env.EMAIL_PROVIDER || "console";
-  const emailProviders = {
-    console: ConsoleEmailService,
-    ses: SesEmailService
-  };
-  const EmailClass = emailProviders[emailProvider];
-  const emailService = new EmailClass();
-
-  // 🔥 Event provider
-  const eventProvider = process.env.EVENT_PROVIDER || "console";
-  const eventProviders = {
-    console: ConsoleEventPublisher,
-    sns: SnsEventPublisher
-  };
-  const EventClass = eventProviders[eventProvider];
-  const eventPublisher = new EventClass();
-
-
+  const eventPublisher = createEventPublisher();
 
   /**
    * ⚙️ Casos de uso
@@ -118,7 +123,6 @@ function build() {
     obtenerCliente: new ObtenerCliente(repository),
     agregarCliente: new AgregarCliente(
       repository,
-      emailService,
       eventPublisher
     )
   };
