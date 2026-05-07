@@ -1,0 +1,5 @@
+Resources:
+  ClienteRegistradoTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: cliente-registrado-topic
