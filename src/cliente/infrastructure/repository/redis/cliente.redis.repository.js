@@ -10,11 +10,27 @@ class ClienteRedisRepository extends ClienteRepository {
   constructor() {
     super();
     this.retries = 0;
-    this.client = createClient({
-      url: process.env.REDIS_URL || "redis://localhost:6379",
+    this.client = this.buildClient(); // Crear cliente inicial
+  }
+
+  buildClient() {
+
+    const redisUrl = process.env.IS_OFFLINE === "true"
+      ? "redis://localhost:6379"  // Redis local para serverless offline
+      : `redis://default:${process.env.REDIS_PASSWORD}` +
+        `@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`; // Redis Cloud para dev|prod
+
+    const client = createClient({ // Crear cliente Redis con opciones de reconexión
+      url: redisUrl,
       socket: {
         reconnectStrategy: (retries) => {
           this.retries = retries;
+
+          logger.warn("Redis reconectando...", {
+            layer: "infrastructure",
+            repository: "ClienteRedisRepository",
+            intento: retries
+          });
 
           if (retries > 3) {
             logger.error("Redis no disponible después de varios intentos", {
@@ -28,59 +44,63 @@ class ClienteRedisRepository extends ClienteRepository {
         }
       }
     });
-    
-    // Eventos importantes
-    this.client.on("error", (err) => {
+  
+    // Eventos Redis
+    client.on("error", (err) => {
       if (this.retries > 3) return; // evitar ruido después del fallo final
 
       logger.error("Error de conexión Redis", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository",
         error: err.message || "Sin detalle",
-        url: process.env.REDIS_URL
       });
     });
 
-    this.client.on("reconnecting", () => {
-      logger.warn("Redis reconectando...", {
-        layer: "infrastructure",
-        repository: "ClienteRedisRepository",
-        intento: this.retries
-      });
-    });
-
-    this.client.on("connect", () => {
+    client.on("connect", () => {
       logger.info("Socket Redis conectado", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository"
       });
     });
 
-    this.client.on("ready", () => {
+    client.on("ready", () => {
       logger.info("Redis listo para operaciones", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository"
       });
     });
 
-    this.client.on("end", () => {
+    client.on("end", () => {
       logger.warn("Conexión Redis cerrada", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository"
       });
     });
 
+    return client;
   }
 
+
   async ensureConnection() {
-    if (this.client.isOpen) return;  // Evitar reconectar si ya está conectado (propio de Redis v4)
+    if (this.client.isReady) return;  // Utiliza la misma conexion si Redis ya está conectado
+    
+    if (!this.client || !this.client.isReady) {  // Cliente cerrado o inexistente
+
+      logger.warn("Recreando cliente Redis", {
+        layer: "infrastructure",
+        repository: "ClienteRedisRepository"
+      });
+
+      this.client = this.buildClient();
+    }
 
     if (!connectionPromise) { // Evita múltiples conexiones concurrentes, Solo la primera request crea la conexión. Las demás esperan la misma promesa (N requests al mismo tiempo pueden intentar conectar) 
       
       logger.info("Intentando conectar a Redis", {
         layer: "infrastructure",
         repository: "ClienteRedisRepository",
-        url: process.env.REDIS_URL
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
       });
 
       connectionPromise = this.client.connect()
@@ -98,10 +118,12 @@ class ClienteRedisRepository extends ClienteRepository {
             retries: this.retries
           });
 
-          connectionPromise = null; // Reset SOLO si falla
-
           throw error;
-        });
+        })
+        .finally(() => {
+
+          connectionPromise = null;
+        });;
     }
      return connectionPromise;
   }

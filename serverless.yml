@@ -7,6 +7,9 @@ provider:
   environment:
     DB_PROVIDER: ${self:custom.env.DB_PROVIDER.${self:provider.stage}}
     EVENT_PROVIDER: ${self:custom.env.EVENT_PROVIDER.${self:provider.stage}}
+    REDIS_HOST: ${self:custom.env.REDIS_HOST.${self:provider.stage}}
+    REDIS_PORT: ${self:custom.env.REDIS_PORT.${self:provider.stage}}
+    REDIS_PASSWORD: ${self:custom.env.REDIS_PASSWORD.${self:provider.stage}}
     EVENTOS_TABLE: eventos
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
     
@@ -38,6 +41,15 @@ custom:
       local: console
       dev: sns
       prod: sns
+    REDIS_HOST:
+      local: ${env:REDIS_HOST, 'localhost'}
+      dev: ${ssm:/aws/reference/secretsmanager/gym-api/dev/redis:host, ''}
+    REDIS_PORT:
+      local: ${env:REDIS_PORT, '6379'}
+      dev: ${ssm:/aws/reference/secretsmanager/gym-api/dev/redis:port, ''}
+    REDIS_PASSWORD:
+      local: ${env:REDIS_PASSWORD, ''}
+      dev: ${ssm:/aws/reference/secretsmanager/gym-api/dev/redis:password, ''}
   dynamodb:
     stages:
       - dev
