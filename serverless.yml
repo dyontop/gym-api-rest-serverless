@@ -7,34 +7,33 @@ provider:
   environment:
     DB_PROVIDER: ${self:custom.env.DB_PROVIDER.${self:provider.stage}}
     EVENT_PROVIDER: ${self:custom.env.EVENT_PROVIDER.${self:provider.stage}}
-    REDIS_HOST: ${ssm:/gym-api/${self:provider.stage}/redis/host}
-    REDIS_PORT: ${ssm:/gym-api/${self:provider.stage}/redis/port}
-    REDIS_PASSWORD: ${ssm:/gym-api/${self:provider.stage}/redis/password}
+    REDIS_HOST: ${ssm:/gym-api/${self:provider.stage}/redis/host, ''}
+    REDIS_PORT: ${ssm:/gym-api/${self:provider.stage}/redis/port, ''}
+    REDIS_PASSWORD: ${ssm:/gym-api/${self:provider.stage}/redis/password, ''}
     EVENTOS_TABLE: eventos
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
-    
+
     SNS_TOPIC_ARN:
       Ref: ClienteRegistradoTopic # ARN del SNS Topic inyectado automáticamente por CloudFormation (cliente-registrado-topic) cuando se despliega la infraestructura (serverless deploy)
 
-
-  iam:  # Permisos IAM para las Lambdas puedan interactuar con DynamoDB y SNS
+  iam: # Permisos IAM para las Lambdas puedan interactuar con DynamoDB y SNS
     role:
       statements:
         - Effect: Allow
           Action:
-            - dynamodb:PutItem  # permite crear/guardar registros en DynamoDB
-            - dynamodb:Query    # permite consultar datos en DynamoDB
-          Resource: "*"
+            - dynamodb:PutItem # permite crear/guardar registros en DynamoDB
+            - dynamodb:Query # permite consultar datos en DynamoDB
+          Resource: '*'
         - Effect: Allow
           Action:
-            - sns:Publish       # permite publicar mensajes en SNS
+            - sns:Publish # permite publicar mensajes en SNS
           Resource:
             - Ref: ClienteRegistradoTopic # restringido SOLO a este topic (cliente-registrado-topic)
         - Effect: Allow
           Action:
-            - ssm:GetParameter  # permite leer parameter store
+            - ssm:GetParameter # permite leer parameter store
             - ssm:GetParameters
-          Resource: "*"
+          Resource: '*'
 
 custom:
   env:

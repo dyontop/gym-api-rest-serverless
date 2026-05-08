@@ -19,8 +19,8 @@ class ClienteRedisRepository extends ClienteRepository {
         : `redis://default:${process.env.REDIS_PASSWORD}` +
           `@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`; // Redis Cloud para dev|prod
 
+    // Crear cliente Redis con opciones de reconexión
     const client = createClient({
-      // Crear cliente Redis con opciones de reconexión
       url: redisUrl,
       socket: {
         reconnectStrategy: retries => {
@@ -75,6 +75,9 @@ class ClienteRedisRepository extends ClienteRepository {
         layer: 'infrastructure',
         repository: 'ClienteRedisRepository',
       });
+
+      this.client = null;
+      connectionPromise = null;
     });
 
     return client;
