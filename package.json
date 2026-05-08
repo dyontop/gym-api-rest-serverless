@@ -14,7 +14,9 @@
     "deploy:prod": "serverless deploy --stage prod",
     "remove:dev": "serverless remove --stage dev",
     "dynamo:init": "node scripts/dynamodb/init-tables.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+
   },
   "author": "Dwight Yontop",
   "license": "ISC",
@@ -38,9 +40,12 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.6.0",
     "jest": "^30.3.0",
     "nodemon": "^3.1.14",
+    "prettier": "^3.8.3",
     "serverless": "^3.38.0",
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^13.3.1",
