@@ -1,6 +1,6 @@
-const { randomUUID } = require("crypto");
-const logger = require("@common/logger");
-const mapper = require("@modules/evento/application/mappers/evento.mapper");
+const { randomUUID } = require('crypto');
+const logger = require('@common/logger');
+const mapper = require('@modules/evento/application/mappers/evento.mapper');
 
 class RegistrarEvento {
   constructor(eventoRepository) {
@@ -8,12 +8,12 @@ class RegistrarEvento {
   }
 
   async ejecutar(requestDto) {
-    logger.info("RegistrarEvento ejecutado", {
-      layer: "application",
-      usecase: "RegistrarEvento",
-      action: "execute",
+    logger.info('RegistrarEvento ejecutado', {
+      layer: 'application',
+      usecase: 'RegistrarEvento',
+      action: 'execute',
       userId: requestDto.userId,
-      type: requestDto.type
+      type: requestDto.type,
     });
 
     try {
@@ -24,13 +24,12 @@ class RegistrarEvento {
 
       // Domain → DTO
       return mapper.toResponse(eventoGuardado);
-
     } catch (error) {
-      logger.error("Error al registrar evento", {
-        layer: "application",
-        usecase: "RegistrarEvento",
+      logger.error('Error al registrar evento', {
+        layer: 'application',
+        usecase: 'RegistrarEvento',
         userId: requestDto.userId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

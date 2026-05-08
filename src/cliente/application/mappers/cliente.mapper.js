@@ -1,6 +1,6 @@
-const Cliente = require("@modules/cliente/domain/entities/cliente");
-const ClienteResponseDto = require("../dto/response/cliente.response");
-const AgregarClienteRequestDto = require("../dto/request/agregar-cliente.request");
+const Cliente = require('@modules/cliente/domain/entities/cliente');
+const ClienteResponseDto = require('../dto/response/cliente.response');
+const AgregarClienteRequestDto = require('../dto/request/agregar-cliente.request');
 
 /**
  * Mapper de Cliente (Application Layer)
@@ -30,10 +30,7 @@ function toDomain(dto, id) {
  * @returns {ClienteResponseDto} DTO listo para exponer (GraphQL / API)
  */
 function toResponse(cliente) {
-  return new ClienteResponseDto(
-    cliente.id,
-    cliente.nombre
-  );
+  return new ClienteResponseDto(cliente.id, cliente.nombre);
 }
 
 /**
@@ -49,5 +46,5 @@ function toListResponse(clientes) {
 module.exports = {
   toDomain,
   toResponse,
-  toListResponse
+  toListResponse,
 };

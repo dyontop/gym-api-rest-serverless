@@ -1,15 +1,15 @@
-const jwtService = require("@modules/auth/infrastructure/services/jwt.service");
-const mapper = require("@modules/auth/application/mappers/auth.mapper");
-const logger = require("@common/logger");
+const jwtService = require('@modules/auth/infrastructure/services/jwt.service');
+const mapper = require('@modules/auth/application/mappers/auth.mapper');
+const logger = require('@common/logger');
 
 class Login {
   async ejecutar(requestDto) {
-    logger.info("Login ejecutado", {
-      layer: "application",
-      usecase: "Login",
-      userId: requestDto.userId
+    logger.info('Login ejecutado', {
+      layer: 'application',
+      usecase: 'Login',
+      userId: requestDto.userId,
     });
-    
+
     try {
       // DTO → Domain
       const user = mapper.toDomain(requestDto);
@@ -17,11 +17,11 @@ class Login {
       // Domain → DTO
       return mapper.toResponse(token);
     } catch (error) {
-      logger.error("Error en Login", {
-        layer: "application",
-        usecase: "Login",
+      logger.error('Error en Login', {
+        layer: 'application',
+        usecase: 'Login',
         userId: requestDto.userId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

@@ -15,19 +15,18 @@
  * - SOLO compone y conecta dependencias internas del módulo
  */
 
+const ClienteMemoryRepository = require('../repository/memory/cliente.memory.repository');
+const ClientePostgresRepository = require('../repository/postgres/cliente.postgres.repository');
+const ClienteRedisRepository = require('../repository/redis/cliente.redis.repository');
 
-const ClienteMemoryRepository = require("../repository/memory/cliente.memory.repository");
-const ClientePostgresRepository = require("../repository/postgres/cliente.postgres.repository");
-const ClienteRedisRepository = require("../repository/redis/cliente.redis.repository");
+const ConsoleEventPublisher = require('../services/event/event.console.publisher');
+const SnsEventPublisher = require('../services/event/event.sns.publisher');
 
-const ConsoleEventPublisher = require("../services/event/event.console.publisher");
-const SnsEventPublisher = require("../services/event/event.sns.publisher");
+const ObtenerClientes = require('@modules/cliente/application/usecases/obtener-clientes.usecase');
+const ObtenerCliente = require('@modules/cliente/application/usecases/obtener-cliente.usecase');
+const AgregarCliente = require('@modules/cliente/application/usecases/agregar-cliente.usecase');
 
-const ObtenerClientes = require("@modules/cliente/application/usecases/obtener-clientes.usecase");
-const ObtenerCliente = require("@modules/cliente/application/usecases/obtener-cliente.usecase");
-const AgregarCliente = require("@modules/cliente/application/usecases/agregar-cliente.usecase");
-
-const logger = require("@common/logger");
+const logger = require('@common/logger');
 
 let instance = null;
 
@@ -37,33 +36,33 @@ let instance = null;
 function createRepository() {
   const provider = process.env.DB_PROVIDER;
 
-  logger.info("Inicializando repository", {
-    layer: "config",
-    module: "cliente",
-    provider
+  logger.info('Inicializando repository', {
+    layer: 'config',
+    module: 'cliente',
+    provider,
   });
 
   if (!provider) {
-    throw new Error("[ClienteContainer] DB_PROVIDER no está definido");
+    throw new Error('[ClienteContainer] DB_PROVIDER no está definido');
   }
 
   const providers = {
     postgres: ClientePostgresRepository,
     redis: ClienteRedisRepository,
-    memory: ClienteMemoryRepository
+    memory: ClienteMemoryRepository,
   };
 
   const RepositoryClass = providers[provider];
 
   if (!RepositoryClass) {
-    logger.error("DB_PROVIDER inválido", { provider });
-    throw new Error("DB_PROVIDER inválido");
+    logger.error('DB_PROVIDER inválido', { provider });
+    throw new Error('DB_PROVIDER inválido');
   }
 
-  logger.info("Repository seleccionado", {
-    layer: "config",
-    module: "cliente",
-    repository: RepositoryClass.name
+  logger.info('Repository seleccionado', {
+    layer: 'config',
+    module: 'cliente',
+    repository: RepositoryClass.name,
   });
 
   return new RepositoryClass();
@@ -73,23 +72,23 @@ function createRepository() {
  * 🏭 Factory de event publisher
  */
 function createEventPublisher() {
-  const eventProvider = process.env.EVENT_PROVIDER || "console";
+  const eventProvider = process.env.EVENT_PROVIDER || 'console';
 
-  logger.info("Inicializando event publisher", {
-    layer: "config",
-    module: "cliente",
-    provider: eventProvider
+  logger.info('Inicializando event publisher', {
+    layer: 'config',
+    module: 'cliente',
+    provider: eventProvider,
   });
 
   const providers = {
     console: ConsoleEventPublisher,
-    sns: SnsEventPublisher
+    sns: SnsEventPublisher,
   };
 
   const EventClass = providers[eventProvider];
 
   if (!EventClass) {
-    throw new Error("EVENT_PROVIDER inválido");
+    throw new Error('EVENT_PROVIDER inválido');
   }
 
   return new EventClass();
@@ -100,16 +99,16 @@ function createEventPublisher() {
  */
 function build() {
   if (instance) {
-    logger.info("Reutilizando instancia de cliente.container", {
-      layer: "config",
-      module: "cliente"
+    logger.info('Reutilizando instancia de cliente.container', {
+      layer: 'config',
+      module: 'cliente',
     });
     return instance;
   }
 
-  logger.info("Inicializando dependencias del módulo cliente", {
-    layer: "config",
-    module: "cliente"
+  logger.info('Inicializando dependencias del módulo cliente', {
+    layer: 'config',
+    module: 'cliente',
   });
 
   const repository = createRepository();
@@ -121,10 +120,7 @@ function build() {
   instance = {
     obtenerClientes: new ObtenerClientes(repository),
     obtenerCliente: new ObtenerCliente(repository),
-    agregarCliente: new AgregarCliente(
-      repository,
-      eventPublisher
-    )
+    agregarCliente: new AgregarCliente(repository, eventPublisher),
   };
 
   return instance;

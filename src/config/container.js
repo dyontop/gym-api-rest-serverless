@@ -16,20 +16,17 @@
  * - SOLO agrupa y expone módulos ya construidos
  */
 
-require("dotenv").config();
-const logger = require("@common/logger");
+require('dotenv').config();
+const logger = require('@common/logger');
 
-logger.info("Inicializando container global", {
-  layer: "config"
+logger.info('Inicializando container global', {
+  layer: 'config',
 });
 
 module.exports = {
-  getCliente: () => 
-    require("@modules/cliente/infrastructure/container/cliente.container")(),
+  getCliente: () => require('@modules/cliente/infrastructure/container/cliente.container')(),
 
-  getAuth: () => 
-    require("@modules/auth/infrastructure/container/auth.container")(),
+  getAuth: () => require('@modules/auth/infrastructure/container/auth.container')(),
 
-  getEvento: () => 
-    require("@modules/evento/infrastructure/container/evento.container")()
+  getEvento: () => require('@modules/evento/infrastructure/container/evento.container')(),
 };

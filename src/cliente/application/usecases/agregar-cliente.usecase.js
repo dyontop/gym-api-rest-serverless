@@ -1,6 +1,6 @@
-const { randomUUID } = require("crypto");
-const logger = require("@common/logger");
-const mapper = require("@modules/cliente/application/mappers/cliente.mapper");
+const { randomUUID } = require('crypto');
+const logger = require('@common/logger');
+const mapper = require('@modules/cliente/application/mappers/cliente.mapper');
 
 class AgregarCliente {
   constructor(clienteRepository, eventPublisher) {
@@ -9,31 +9,30 @@ class AgregarCliente {
   }
 
   async ejecutar(requestDto) {
-    logger.info("AgregarCliente ejecutado", {
-      layer: "application",
-      usecase: "AgregarCliente",
-      action: "execute",
-      nombre: requestDto.nombre
+    logger.info('AgregarCliente ejecutado', {
+      layer: 'application',
+      usecase: 'AgregarCliente',
+      action: 'execute',
+      nombre: requestDto.nombre,
     });
 
     const id = randomUUID();
-    
+
     // DTO → Domain
     const nuevoCliente = mapper.toDomain(requestDto, id);
 
     try {
-
       // 1. CORE (negocio): guardar cliente
       const clienteGuardado = await this.clienteRepository.guardar(nuevoCliente);
 
       // 2. EVENTO (comunicación): desacoplar efectos secundarios
       await this.eventPublisher.publish({
-        type: "CLIENTE_REGISTRADO",
+        type: 'CLIENTE_REGISTRADO',
         payload: {
           id: clienteGuardado.id,
           nombre: clienteGuardado.nombre,
-          email: clienteGuardado.email // importante para SES
-        }
+          email: clienteGuardado.email, // importante para SES
+        },
       });
 
       /**
@@ -51,16 +50,15 @@ class AgregarCliente {
       //     error: error.message
       //   });
       // }
-    
+
       // Domain → DTO
       return mapper.toResponse(clienteGuardado);
-      
     } catch (error) {
-      logger.error("Error al agregar cliente", {
-        layer: "application",
-        usecase: "AgregarCliente",
+      logger.error('Error al agregar cliente', {
+        layer: 'application',
+        usecase: 'AgregarCliente',
         nombre: requestDto.nombre,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

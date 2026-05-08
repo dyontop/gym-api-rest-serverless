@@ -1,5 +1,5 @@
-const logger = require("@common/logger");
-const mapper = require("@modules/cliente/application/mappers/cliente.mapper");
+const logger = require('@common/logger');
+const mapper = require('@modules/cliente/application/mappers/cliente.mapper');
 
 class ObtenerClientes {
   constructor(clienteRepository) {
@@ -7,19 +7,19 @@ class ObtenerClientes {
   }
 
   async ejecutar() {
-    logger.info("ObtenerClientes ejecutado", {
-      layer: "application",
-      usecase: "ObtenerClientes",
-      action: "execute"
+    logger.info('ObtenerClientes ejecutado', {
+      layer: 'application',
+      usecase: 'ObtenerClientes',
+      action: 'execute',
     });
-    try{
-      const clientes =  await this.clienteRepository.listar();
+    try {
+      const clientes = await this.clienteRepository.listar();
       return mapper.toListResponse(clientes);
-    } catch(error) {
-      logger.error("Error al listar clientes", {
-        layer: "application",
-        usecase: "ObtenerClientes",
-        error: error.message
+    } catch (error) {
+      logger.error('Error al listar clientes', {
+        layer: 'application',
+        usecase: 'ObtenerClientes',
+        error: error.message,
       });
       throw error;
     }

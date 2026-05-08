@@ -1,5 +1,5 @@
-const logger = require("@common/logger");
-const mapper = require("@modules/cliente/application/mappers/cliente.mapper");
+const logger = require('@common/logger');
+const mapper = require('@modules/cliente/application/mappers/cliente.mapper');
 
 class ObtenerCliente {
   constructor(clienteRepository) {
@@ -7,22 +7,22 @@ class ObtenerCliente {
   }
 
   async ejecutar(requestDto) {
-    logger.info("ObtenerCliente ejecutado", {
-      layer: "application",
-      usecase: "ObtenerCliente",
-      action: "execute",
-      id: requestDto.id
+    logger.info('ObtenerCliente ejecutado', {
+      layer: 'application',
+      usecase: 'ObtenerCliente',
+      action: 'execute',
+      id: requestDto.id,
     });
 
-    try{
+    try {
       const cliente = await this.clienteRepository.buscarPorId(requestDto.id);
       return cliente ? mapper.toResponse(cliente) : null;
-    } catch(error) {
-      logger.error("Error al obtener cliente", {
-        layer: "application",
-        usecase: "ObtenerCliente",
+    } catch (error) {
+      logger.error('Error al obtener cliente', {
+        layer: 'application',
+        usecase: 'ObtenerCliente',
         id: requestDto.id,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

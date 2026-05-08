@@ -1,10 +1,10 @@
-const EventoMemoryRepository = require("../repository/memory/evento.memory.repository");
-const EventoDynamoRepository = require("../repository/dynamodb/evento.dynamodb.repository");
+const EventoMemoryRepository = require('../repository/memory/evento.memory.repository');
+const EventoDynamoRepository = require('../repository/dynamodb/evento.dynamodb.repository');
 
-const RegistrarEvento = require("@modules/evento/application/usecases/registrar-evento.usecase");
-const ObtenerEventos = require("@modules/evento/application/usecases/obtener-evento.usecase");
+const RegistrarEvento = require('@modules/evento/application/usecases/registrar-evento.usecase');
+const ObtenerEventos = require('@modules/evento/application/usecases/obtener-evento.usecase');
 
-const logger = require("@common/logger");
+const logger = require('@common/logger');
 
 let instance = null;
 
@@ -12,22 +12,20 @@ let instance = null;
  * Factory de repositorio de eventos
  */
 function createEventoRepository() {
-  const isOffline = String(process.env.IS_OFFLINE) === "true";
+  const isOffline = String(process.env.IS_OFFLINE) === 'true';
 
-  logger.info("Inicializando repository de eventos", {
-    layer: "config",
-    module: "evento",
-    isOffline
+  logger.info('Inicializando repository de eventos', {
+    layer: 'config',
+    module: 'evento',
+    isOffline,
   });
 
-  const RepositoryClass = isOffline
-    ? EventoMemoryRepository
-    : EventoDynamoRepository;
+  const RepositoryClass = isOffline ? EventoMemoryRepository : EventoDynamoRepository;
 
-  logger.info("Repository de eventos seleccionado", {
-    layer: "config",
-    module: "evento",
-    repository: RepositoryClass.name
+  logger.info('Repository de eventos seleccionado', {
+    layer: 'config',
+    module: 'evento',
+    repository: RepositoryClass.name,
   });
 
   return new RepositoryClass();
@@ -38,16 +36,16 @@ function createEventoRepository() {
  */
 function build() {
   if (instance) {
-    logger.info("Reutilizando instancia de evento.container", {
-      layer: "config",
-      module: "evento"
+    logger.info('Reutilizando instancia de evento.container', {
+      layer: 'config',
+      module: 'evento',
     });
     return instance;
   }
 
-  logger.info("Inicializando dependencias del módulo evento", {
-    layer: "config",
-    module: "evento"
+  logger.info('Inicializando dependencias del módulo evento', {
+    layer: 'config',
+    module: 'evento',
   });
 
   const repository = createEventoRepository();
@@ -57,11 +55,10 @@ function build() {
    */
   instance = {
     registrarEvento: new RegistrarEvento(repository),
-    obtenerEventos: new ObtenerEventos(repository)
+    obtenerEventos: new ObtenerEventos(repository),
   };
 
   return instance;
 }
 
 module.exports = build;
-

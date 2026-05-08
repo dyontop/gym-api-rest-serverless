@@ -1,5 +1,5 @@
-const logger = require("@common/logger");
-const mapper = require("@modules/evento/application/mappers/evento.mapper");
+const logger = require('@common/logger');
+const mapper = require('@modules/evento/application/mappers/evento.mapper');
 
 class ObtenerEventos {
   constructor(eventoRepository) {
@@ -7,10 +7,10 @@ class ObtenerEventos {
   }
 
   async ejecutar(requestDto) {
-    logger.info("ObtenerEventos ejecutado", {
-      layer: "application",
-      usecase: "ObtenerEventos",
-      action: "execute"
+    logger.info('ObtenerEventos ejecutado', {
+      layer: 'application',
+      usecase: 'ObtenerEventos',
+      action: 'execute',
     });
 
     try {
@@ -18,13 +18,12 @@ class ObtenerEventos {
 
       // Domain → DTO
       return mapper.toListResponse(eventos);
-
     } catch (error) {
-      logger.error("Error al obtener eventos", {
-        layer: "application",
-        usecase: "ObtenerEventosPorUsuario",
+      logger.error('Error al obtener eventos', {
+        layer: 'application',
+        usecase: 'ObtenerEventosPorUsuario',
         userId: requestDto.userId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

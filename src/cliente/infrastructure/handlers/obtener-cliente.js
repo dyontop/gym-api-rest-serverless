@@ -1,13 +1,12 @@
-require("module-alias/register");
-require("dotenv").config();
+require('module-alias/register');
+require('dotenv').config();
 
-const { getCliente } = require("@config/container");
-const http = require("@common/utils/http.util");
-const { getUserFromEvent, requireAuth } = require("@common/utils/auth.util");
+const { getCliente } = require('@config/container');
+const http = require('@common/utils/http.util');
+const { getUserFromEvent, requireAuth } = require('@common/utils/auth.util');
 
-module.exports.handler = async (event) => {
+module.exports.handler = async event => {
   try {
-
     // ✅ 1. Auth primero
     const user = getUserFromEvent(event);
     requireAuth(user);
@@ -15,7 +14,7 @@ module.exports.handler = async (event) => {
     const id = event.pathParameters?.id;
 
     if (!id) {
-      return http.badRequest("id es requerido");
+      return http.badRequest('id es requerido');
     }
 
     // ✅ 2. Lazy load
@@ -29,7 +28,6 @@ module.exports.handler = async (event) => {
     }
 
     return http.ok(result);
-
   } catch (error) {
     return http.serverError(error);
   }

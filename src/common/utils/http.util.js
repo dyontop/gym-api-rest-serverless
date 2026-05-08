@@ -19,7 +19,7 @@ function badRequest(message) {
   };
 }
 
-function unauthorized(message = "No autorizado") {
+function unauthorized(message = 'No autorizado') {
   return {
     statusCode: 401,
     body: JSON.stringify({ message }),
@@ -29,7 +29,7 @@ function unauthorized(message = "No autorizado") {
 function notFound() {
   return {
     statusCode: 404,
-    body: JSON.stringify({ message: "Not Found" }),
+    body: JSON.stringify({ message: 'Not Found' }),
   };
 }
 

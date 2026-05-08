@@ -1,6 +1,6 @@
-const User = require("@modules/auth/domain/entities/user");
-const LoginResponseDto = require("@modules/auth/application/dto/response/login.response");
-const LoginRequestDto = require("@modules/auth/application/dto/request/login.request");
+const User = require('@modules/auth/domain/entities/user');
+const LoginResponseDto = require('@modules/auth/application/dto/response/login.response');
+const LoginRequestDto = require('@modules/auth/application/dto/request/login.request');
 
 /**
  * Mapper de Auth (Application Layer)
@@ -26,5 +26,5 @@ function toResponse(token) {
 
 module.exports = {
   toDomain,
-  toResponse
+  toResponse,
 };

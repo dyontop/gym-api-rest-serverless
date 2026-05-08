@@ -1,12 +1,12 @@
-const logger = require("@common/logger");
+const logger = require('@common/logger');
 
 class ConsoleEmailService {
   async enviarBienvenida(cliente) {
-    logger.info("Email enviado (console)", {
-      layer: "infrastructure",
-      service: "ConsoleEmailService",
+    logger.info('Email enviado (console)', {
+      layer: 'infrastructure',
+      service: 'ConsoleEmailService',
       clienteId: cliente.id,
-      nombre: cliente.nombre
+      nombre: cliente.nombre,
     });
 
     console.log(`📧 Bienvenido ${cliente.nombre}`);

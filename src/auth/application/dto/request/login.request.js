@@ -6,7 +6,6 @@ class LoginRequestDto {
 
 module.exports = LoginRequestDto;
 
-
 // class LoginRequestDto {
 //   constructor(username, password) {
 //     this.username = username;

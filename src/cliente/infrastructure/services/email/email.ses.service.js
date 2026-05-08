@@ -1,27 +1,27 @@
-const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
-const logger = require("@common/logger");
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const logger = require('@common/logger');
 
 class SesEmailService {
   constructor() {
     this.client = new SESClient({
-      region: process.env.AWS_REGION || "us-east-1",
+      region: process.env.AWS_REGION || 'us-east-1',
     });
 
     this.fromEmail = process.env.SES_FROM_EMAIL;
 
     if (!this.fromEmail) {
-      throw new Error("SES_FROM_EMAIL no está definido");
+      throw new Error('SES_FROM_EMAIL no está definido');
     }
   }
 
   async enviarBienvenida(cliente) {
     const toEmail = this._getEmail(cliente);
 
-    logger.info("Enviando email con SES", {
-      layer: "infrastructure",
-      service: "SesEmailService",
+    logger.info('Enviando email con SES', {
+      layer: 'infrastructure',
+      service: 'SesEmailService',
       clienteId: cliente.id,
-      toEmail
+      toEmail,
     });
 
     try {
@@ -32,13 +32,13 @@ class SesEmailService {
         },
         Message: {
           Subject: {
-            Data: "Bienvenido 🚀",
-            Charset: "UTF-8",
+            Data: 'Bienvenido 🚀',
+            Charset: 'UTF-8',
           },
           Body: {
             Text: {
               Data: `Hola ${cliente.nombre}, bienvenido a la plataforma.`,
-              Charset: "UTF-8",
+              Charset: 'UTF-8',
             },
             Html: {
               Data: `
@@ -49,7 +49,7 @@ class SesEmailService {
                   </body>
                 </html>
               `,
-              Charset: "UTF-8",
+              Charset: 'UTF-8',
             },
           },
         },
@@ -57,24 +57,22 @@ class SesEmailService {
 
       const response = await this.client.send(command);
 
-      logger.info("Email enviado correctamente", {
-        layer: "infrastructure",
-        service: "SesEmailService",
-        messageId: response.MessageId
+      logger.info('Email enviado correctamente', {
+        layer: 'infrastructure',
+        service: 'SesEmailService',
+        messageId: response.MessageId,
       });
 
       return response;
-
     } catch (error) {
-
       // 🔥 Manejo más fino de errores
-      if (error.name === "MessageRejected") {
-        logger.error("SES rechazó el mensaje", {
-          reason: error.message
+      if (error.name === 'MessageRejected') {
+        logger.error('SES rechazó el mensaje', {
+          reason: error.message,
         });
       } else {
-        logger.error("Error enviando email SES", {
-          error: error.message
+        logger.error('Error enviando email SES', {
+          error: error.message,
         });
       }
 
@@ -85,7 +83,7 @@ class SesEmailService {
   _getEmail(cliente) {
     // ✅ PRODUCCIÓN: esto debe venir del dominio
     if (!cliente.email) {
-      throw new Error("Cliente no tiene email");
+      throw new Error('Cliente no tiene email');
     }
     return cliente.email;
   }

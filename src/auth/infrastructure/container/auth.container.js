@@ -1,5 +1,5 @@
-const Login = require("@modules/auth/application/usecases/login.usecase");
-const logger = require("@common/logger");
+const Login = require('@modules/auth/application/usecases/login.usecase');
+const logger = require('@common/logger');
 
 let instance = null;
 
@@ -8,23 +8,23 @@ let instance = null;
  */
 function build() {
   if (instance) {
-    logger.info("Reutilizando instancia de auth.container", {
-      layer: "config",
-      module: "auth"
+    logger.info('Reutilizando instancia de auth.container', {
+      layer: 'config',
+      module: 'auth',
     });
     return instance;
   }
 
-  logger.info("Inicializando dependencias del módulo auth", {
-    layer: "config",
-    module: "auth"
+  logger.info('Inicializando dependencias del módulo auth', {
+    layer: 'config',
+    module: 'auth',
   });
 
   /**
    * Casos de uso
    */
   instance = {
-    login: new Login()
+    login: new Login(),
   };
 
   return instance;

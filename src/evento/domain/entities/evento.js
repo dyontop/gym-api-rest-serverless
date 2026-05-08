@@ -1,15 +1,15 @@
 class Evento {
   constructor({ id, userId, type, timestamp }) {
     if (!id) {
-      throw new Error("id es requerido");
+      throw new Error('id es requerido');
     }
 
     if (!userId) {
-      throw new Error("userId es requerido");
+      throw new Error('userId es requerido');
     }
 
     if (!type) {
-      throw new Error("type es requerido");
+      throw new Error('type es requerido');
     }
 
     this.id = id;
@@ -18,7 +18,7 @@ class Evento {
     this.timestamp = timestamp || new Date().toISOString();
 
     // 🔥 Inmutabilidad
-    Object.freeze(this);    //no cambia las propiedades del objeto, es inmutable
+    Object.freeze(this); //no cambia las propiedades del objeto, es inmutable
   }
 }
 

@@ -1,6 +1,6 @@
 class EventPublisher {
   async publish(event) {
-    throw new Error("EventPublisher.publish no implementado");
+    throw new Error('EventPublisher.publish no implementado');
   }
 }
 

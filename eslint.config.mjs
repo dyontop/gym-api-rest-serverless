@@ -1,54 +1,52 @@
-import js from "@eslint/js";
-import globals from "globals";
-import prettier from "eslint-plugin-prettier";
-import eslintConfigPrettier from "eslint-config-prettier";
-import { defineConfig } from "eslint/config";
+import js from '@eslint/js';
+import globals from 'globals';
+import prettier from 'eslint-plugin-prettier';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
   js.configs.recommended,
 
   {
-    ignores: [
-      "node_modules",
-      ".serverless",
-      "coverage",
-      ".env"
-    ],
+    ignores: ['node_modules', '.serverless', 'coverage', '.env'],
 
-    files: ["**/*.js"],
+    files: ['**/*.js'],
 
     languageOptions: {
-      sourceType: "commonjs", // for Node.js
-      globals: globals.node
+      sourceType: 'commonjs', // for Node.js
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
     },
 
     plugins: {
-      prettier
+      prettier,
     },
 
     rules: {
-      "prettier/prettier": "error",
-      semi: ["error", "always"],
+      'prettier/prettier': 'error',
+      semi: ['error', 'always'],
       quotes: [
-        "error",
-        "single",
+        'error',
+        'single',
         {
-          avoidEscape: true
-        }
+          avoidEscape: true,
+        },
       ],
-      curly: ["error", "all"],
-      indent: ["error", 2],
+      curly: ['error', 'all'],
+      indent: ['error', 2],
 
-      "no-console": "off",
-      "no-unused-vars": [
-        "warn",
+      'no-console': 'off',
+      'no-unused-vars': [
+        'warn',
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_"
-        }
-      ]
-    }
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
 
-  eslintConfigPrettier
+  eslintConfigPrettier,
 ]);
