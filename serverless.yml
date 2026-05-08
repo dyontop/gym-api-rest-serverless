@@ -1,4 +1,4 @@
-service: api-clientes
+service: gym-api
 
 provider:
   name: aws
@@ -7,9 +7,9 @@ provider:
   environment:
     DB_PROVIDER: ${self:custom.env.DB_PROVIDER.${self:provider.stage}}
     EVENT_PROVIDER: ${self:custom.env.EVENT_PROVIDER.${self:provider.stage}}
-    REDIS_HOST: ${self:custom.env.REDIS_HOST.${self:provider.stage}}
-    REDIS_PORT: ${self:custom.env.REDIS_PORT.${self:provider.stage}}
-    REDIS_PASSWORD: ${self:custom.env.REDIS_PASSWORD.${self:provider.stage}}
+    REDIS_HOST: ${ssm:/gym-api/${self:provider.stage}/redis/host}
+    REDIS_PORT: ${ssm:/gym-api/${self:provider.stage}/redis/port}
+    REDIS_PASSWORD: ${ssm:/gym-api/${self:provider.stage}/redis/password}
     EVENTOS_TABLE: eventos
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
     
@@ -30,6 +30,11 @@ provider:
             - sns:Publish       # permite publicar mensajes en SNS
           Resource:
             - Ref: ClienteRegistradoTopic # restringido SOLO a este topic (cliente-registrado-topic)
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter  # permite leer parameter store
+            - ssm:GetParameters
+          Resource: "*"
 
 custom:
   env:
